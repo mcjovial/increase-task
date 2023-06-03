@@ -15,7 +15,6 @@ const ItemFilter = () => {
       setError(false);
       handleFilterChange(event);
     } else {
-      console.log('hey');
       setError(true);
     }
   };

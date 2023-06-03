@@ -1,6 +1,6 @@
 import React, { createContext, useState, ReactNode, ChangeEvent, FormEvent, useEffect } from 'react';
 import { IItem, tableData } from '../data/items';
-import { search } from '../utils/helpers';
+import { search, tableFilter } from '../utils/helpers';
 
 interface FilterState {
   item_id: string;
@@ -75,19 +75,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
     e.preventDefault();
     const { item_id, order_number, checkboxOptions } = filters;
 
-    const filteredItems: IItem[] = tableData.filter((item) => {
-      if (!item_id && !order_number && checkboxOptions.length == 0) {
-        return;
-      }
-      const orderNumberMatch =
-        order_number === '' || item.order_number.toString().includes(order_number);
-      const typeMatch =
-        checkboxOptions.length === 0 || checkboxOptions.includes('ALL') || checkboxOptions.includes(item.type);
-      const itemIdMatch =
-        item_id === '' || item.item_id.toString().includes(item_id);
-  
-      return orderNumberMatch && typeMatch && itemIdMatch;
-    });
+    const filteredItems: IItem[] = tableFilter(tableData, item_id, order_number, checkboxOptions);
 
     setData(filteredItems);
     setFilt(filteredItems);
