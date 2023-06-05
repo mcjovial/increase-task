@@ -15,8 +15,14 @@ export interface FilterState {
 	checkboxOptions: string[];
 }
 
-interface FilterContextType {
+export interface ErrorState {
+	item_id: boolean;
+	order_number: boolean;
+}
+
+export interface FilterContextType {
 	filters: FilterState;
+	errors: ErrorState;
 	data: IItem[];
 	filt: IItem[];
 	query: string;
@@ -26,6 +32,7 @@ interface FilterContextType {
 	setData: (data: IItem[]) => void;
 	setFilt: (data: IItem[]) => void;
 	setQuery: (val: string) => void;
+	handleReset: () => void;
 }
 
 export const FilterContext = createContext<FilterContextType | undefined>(
@@ -37,9 +44,15 @@ interface FilterProviderProps {
 }
 
 export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
+	const initialErrorState = {
+		item_id: false,
+		order_number: false,
+	};
+
 	const [data, setData] = useState<IItem[]>([]);
 	const [filt, setFilt] = useState<IItem[]>([]);
 	const [query, setQuery] = useState<string>('');
+	const [errors, setErrors] = useState<ErrorState>(initialErrorState);
 	const [filters, setFilters] = useState<FilterState>({
 		item_id: '',
 		order_number: '',
@@ -51,6 +64,32 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
 			...prevFilters,
 			...newFilters,
 		}));
+	};
+
+	const handleData = (name: string, value: string) => {
+		const inputValue = value;
+		const onlyNumbers = /^[0-9\b]+$/; // Regex pattern to match only numbers
+
+		if (inputValue === '' || onlyNumbers.test(inputValue)) {
+			// If the input value is empty or contains only numbers, update the state
+			setErrors((prev) => ({
+				...prev,
+				[name]: false,
+			}));
+			// If the input length is less than 4
+			if (inputValue.length < 4) {
+				setErrors((prev) => ({
+					...prev,
+					[name]: true,
+				}));
+			}
+			updateFilters({ [name]: value });
+		} else {
+			setErrors((prev) => ({
+				...prev,
+				[name]: true,
+			}));
+		}
 	};
 
 	useEffect(() => {
@@ -75,7 +114,7 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
 			}
 			updateFilters({ checkboxOptions });
 		} else {
-			updateFilters({ [name]: value });
+			handleData(name, value);
 		}
 	};
 
@@ -94,6 +133,16 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
 		setFilt(filteredItems);
 	};
 
+	const handleReset = () => {
+		setData([]);
+		updateFilters({
+			item_id: '',
+			order_number: '',
+			checkboxOptions: [],
+		});
+		setErrors(initialErrorState);
+	};
+
 	const contextValue: FilterContextType = {
 		filters,
 		data,
@@ -105,6 +154,8 @@ export const FilterProvider: React.FC<FilterProviderProps> = ({ children }) => {
 		setData,
 		setFilt,
 		setQuery,
+		errors,
+		handleReset,
 	};
 
 	return (

@@ -10,7 +10,7 @@ export default function Drawer({
 	isOpen: any;
 	setIsOpen: any;
 }) {
-	const { handleFilter, setData, updateFilters }: any =
+	const { errors, handleFilter, setData, updateFilters, handleReset }: any =
 		useContext(FilterContext);
 
 	return (
@@ -46,14 +46,7 @@ export default function Drawer({
 							</div>
 							<div>
 								<button
-									onClick={() => (
-										setData([]),
-										updateFilters({
-											item_id: '',
-											order_number: '',
-											checkboxOptions: [],
-										})
-									)}
+									onClick={() => handleReset()}
 									className="text-sm text-[#0C67A0] font-semibold"
 								>
 									Reset all
@@ -70,7 +63,12 @@ export default function Drawer({
 							Cancel
 						</button>
 						<button
-							className="py-3 px-16 rounded bg-[#0C67A0] text-white hover:bg-[#D9E0E7] hover:text-[#0C67A0]"
+							className={`py-3 px-16 rounded text-white hover:bg-[#D9E0E7] hover:text-[#0C67A0] ${
+								errors.item_id === true || errors.order_number === true
+									? 'bg-[#D9E0E7]'
+									: 'bg-[#0C67A0]'
+							}`}
+							disabled={errors.item_id === true || errors.order_number === true}
 							onClick={handleFilter}
 						>
 							Apply
