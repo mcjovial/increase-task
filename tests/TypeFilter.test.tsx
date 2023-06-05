@@ -1,6 +1,10 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { FilterContext, FilterState } from '../src/contexts/FilterContext';
+import {
+	ErrorState,
+	FilterContext,
+	FilterState,
+} from '../src/contexts/FilterContext';
 import TypeFilter from '../src/components/ItemSearch/Filter/TypeFilter';
 import '@testing-library/jest-dom';
 
@@ -12,9 +16,14 @@ describe('TypeFilter', () => {
 			order_number: '',
 			checkboxOptions: [],
 		};
+		const errors: ErrorState = {
+			item_id: false,
+			order_number: false,
+		};
 
 		const contextValue = {
 			filters,
+			errors,
 			handleFilterChange,
 			data: [],
 			filt: [],
@@ -24,6 +33,7 @@ describe('TypeFilter', () => {
 			setData: jest.fn(),
 			setFilt: jest.fn(),
 			setQuery: jest.fn(),
+			handleReset: jest.fn(),
 		};
 
 		render(

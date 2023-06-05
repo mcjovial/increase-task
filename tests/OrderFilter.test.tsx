@@ -1,6 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { FilterContext, FilterState } from '../src/contexts/FilterContext';
+import {
+	ErrorState,
+	FilterContext,
+	FilterProvider,
+	FilterState,
+} from '../src/contexts/FilterContext';
 import OrderFilter from '../src/components/ItemSearch/Filter/OrderFilter';
 import '@testing-library/jest-dom';
 
@@ -12,9 +17,14 @@ describe('OrderFilter', () => {
 			order_number: '',
 			checkboxOptions: [],
 		};
+		const errors: ErrorState = {
+			item_id: false,
+			order_number: false,
+		};
 
 		const contextValue = {
 			filters,
+			errors,
 			handleFilterChange,
 			data: [],
 			filt: [],
@@ -24,6 +34,7 @@ describe('OrderFilter', () => {
 			setData: jest.fn(),
 			setFilt: jest.fn(),
 			setQuery: jest.fn(),
+			handleReset: jest.fn(),
 		};
 
 		render(
@@ -42,38 +53,17 @@ describe('OrderFilter', () => {
 	});
 
 	test('should display an error message for invalid input', () => {
-		const handleFilterChange = jest.fn();
-		const filters: FilterState = {
-			item_id: '',
-			order_number: '',
-			checkboxOptions: [],
-		};
-
-		const contextValue = {
-			filters,
-			handleFilterChange,
-			data: [],
-			filt: [],
-			query: '',
-			updateFilters: jest.fn(),
-			handleFilter: jest.fn(),
-			setData: jest.fn(),
-			setFilt: jest.fn(),
-			setQuery: jest.fn(),
-		};
-		render(
-			<FilterContext.Provider value={contextValue}>
+		const { getByPlaceholderText, getByText } = render(
+			<FilterProvider>
 				<OrderFilter />
-			</FilterContext.Provider>
+			</FilterProvider>
 		);
 
-		const textarea = screen.getByPlaceholderText(
-			'Order ID (Ex. "6733444444383")'
-		);
+		const textarea = getByPlaceholderText('Order ID (Ex. "6733444444383")');
 		fireEvent.change(textarea, { target: { value: 'abcd' } });
 
-		const errorText = screen.getByText(
-			'Node needs to be four digits (Ex. "1111")'
+		const errorText = getByText(
+			'Node needs to be at least four digits (Ex. "1111")'
 		);
 		expect(errorText).toBeInTheDocument();
 	});
